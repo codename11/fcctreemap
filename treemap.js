@@ -14,9 +14,14 @@ let myData = async() => {
 };
 
 myData().then((data)=>{ 
-    console.log(data.games); 
+    console.log(data); 
 
-    let m = {top: 10, right: 10, bottom: 10, left: 10};
+    let platforms = [];
+    data.games.children.forEach((item, i) => {
+        platforms.push(item.name);
+    });
+
+    let m = {top: 60, right: 30, bottom: 60, left: 30};
     let w = 640;
     let h = 480;
 
@@ -34,10 +39,21 @@ myData().then((data)=>{
     d3.treemap()
         .size([w, h])
         .paddingInner(2)(root)
+    
+    const random_hex_color_code = () => {
+        let n = (Math.random() * 0xfffff * 1000000).toString(16);
+        return '#' + n.slice(0, 6);
+    };
 
+    let c1 = [];
+    platforms.forEach((item, i) => {
+        c1.push(random_hex_color_code());
+    });
+    
+    console.log(platforms.length,c1.length);
     let color = d3.scaleOrdinal()
-        .domain(["Video Game Sales Data Top 100"])
-        .range([ "#402D54", "#D18975", "#8FD175", "darkorange", "navy", "aqua"])
+        .domain(platforms.join(" "))
+        .range(c1);
 
     //Creating tooltip element.
     let tooltip = d3.select('#demo')
@@ -92,7 +108,7 @@ myData().then((data)=>{
         })
         .style("stroke", "black")
         .style("fill", (d)  => { 
-            console.log(d);
+
             return color(d.data.category);
 
         })
@@ -102,8 +118,7 @@ myData().then((data)=>{
 
         })
         .on('mouseover', (d, i) => {
-            //console.log(d);
-            //console.log(d.data.value);
+
             tooltip.style("left", (d3.event.pageX + 10) + "px");
             tooltip.style("top", (d3.event.pageY - 28) + "px");
             tooltip.attr("data-value", d.data.value);
@@ -115,6 +130,48 @@ myData().then((data)=>{
             tooltip.style('opacity', 0);
         });
 
+        let m1 = {top: 60, right: 30, bottom: 60, left: 30};
+        let w1 = 500;
+
+        //Creating legend element.
+        let legend = d3.select("#demo")
+        .append("svg")
+        .attr("width", w1)
+        .attr("id", "legend")
+        .append("g")
+        .attr("transform", "translate(60, 10)");
+
+        let lBlock = 15;
+        let lHSpaceing = 150;
+        let lVSpaceing = 10;
+        let lX = 3;
+        let lY = -2;
+        let legendElemsPerRow = Math.floor(w1/lHSpaceing);
+
+        legend.selectAll("rect")
+            .data(platforms)
+            .enter()
+            .append("g")
+            .attr("transform", (d, i) => {
+                
+                return "translate(" + ((i%legendElemsPerRow)*lHSpaceing) + "," + ((Math.floor(i/legendElemsPerRow))*lBlock + (lVSpaceing*(Math.floor(i/legendElemsPerRow)))) + ")";
+
+            })
+            .append("rect")
+            .attr("class", "legend-item")
+            .attr("width", lBlock)
+            .attr("height", lBlock)
+            .attr("fill", (d, i) => {
+                return c1[i];
+            });
+
+        legend.selectAll("g")
+            .append("text")
+            .attr('x', lBlock + lX)                          
+            .attr('y', lBlock + lY)  
+            .text((d,i) => {
+                return d;
+            });
 
 });
 
@@ -130,4 +187,4 @@ async function getData(url = '', data = {}) {
 
 }
 
-console.log(getData("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_dendrogram_full.json", {}));
+//console.log(getData("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_dendrogram_full.json", {}));
