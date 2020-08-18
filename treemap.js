@@ -14,7 +14,6 @@ let myData = async() => {
 };
 
 myData().then((data)=>{ 
-    console.log(data); 
 
     let platforms = [];
     data.games.children.forEach((item, i) => {
@@ -22,13 +21,13 @@ myData().then((data)=>{
     });
 
     let m = {top: 60, right: 30, bottom: 60, left: 30};
-    let w = 640;
-    let h = 480;
+    let w = 1152;
+    let h = 648;
 
     let svg = d3.select("#demo")
     .append("svg")
-    .attr("width", w + m.left*2)
-    .attr("height", h + m.top*2)
+    .attr("width", w )
+    .attr("height", h )
     .append("g")
     .attr("transform", "translate(" + m.left + "," + m.top + ")");
 
@@ -66,10 +65,24 @@ myData().then((data)=>{
         .domain([10, 30])
         .range([0.5,1]) 
 
-    svg.selectAll("rect")
+    let g1 = svg.selectAll("rect")
         .data(root.leaves())
         .enter()
-        .append("rect")
+        .append("g");
+
+        g1.append("text")
+        .attr("font-size", "0.5em")
+        .attr("x", (d,i) => {
+            return d.x0; 
+        })
+        .attr("y", (d,i) => {
+            return d.y0+10; 
+        })
+        .text((d,i)=>{
+            return d.data.name;
+        });
+        
+    g1.append("rect")
         .attr("class", "tile")
         .attr("data-name", (d, i) => {
 
@@ -129,7 +142,7 @@ myData().then((data)=>{
         .on('mouseout', (d) => {
             tooltip.style('opacity', 0);
         });
-
+        
         let m1 = {top: 60, right: 30, bottom: 60, left: 30};
         let w1 = 500;
 
